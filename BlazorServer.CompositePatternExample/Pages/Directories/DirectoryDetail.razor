@@ -1,0 +1,19 @@
+﻿@page "/directorydetail/{DirectoryId:int}"
+@using Domain.Models;
+@using BlazorServer.CompositePatternExample.Pages._Components;
+
+<MudText Class="mt-5">Click Arrows to expand.</MudText>
+<MudText Class="mt-2 mb-2">Click Directories to get size of directory.</MudText>
+<MudText Class="mb-5">Click Files to get size of files.</MudText>
+
+<CascadingValue Value="DirectoryList">
+    <MudTreeView T="string" ExpandOnClick="true" Hover="true" Color="Color" @bind-SelectedValue="SelectedValue">
+        <MudTreeViewItem Value="@Directory.Name" TextTypo="Typo.h5" ExpandedIcon="@Icons.Material.Filled.ArrowRight" OnClick="() => DisplayDirectorySize(Directory)">
+            @foreach (var file in GetFiles(Directory.Id))
+            {
+                <MudTreeViewItem Value="@file.Name" TextTypo="Typo.h6" OnClick="@(() => DisplayFileSize(file))" />
+            }
+            <RecursiveTree ParentID=@Directory.Id />
+        </MudTreeViewItem>
+    </MudTreeView>
+</CascadingValue>

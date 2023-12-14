@@ -1,0 +1,23 @@
+﻿@page "/rootdirectories";
+
+<MudDataGrid @attributes="Splats.DataGrid(Title!)" T="Domain.Models.Directory" Items="@Directories" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@QuickFilter" Hideable="true">
+<ToolBarContent>
+    <MudText @attributes="Splats.PageHeader(Title!)">@Title</MudText>
+        <MudSpacer />
+        <MudTextField @attributes='Splats.SearchField()' @bind-Value="SearchString" Class="mt-0"></MudTextField>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Name" Title="Name" Sortable="true" Filterable="false" InitialDirection="SortDirection.Ascending" />
+        <PropertyColumn Property="x => x.Size" Title="Size" />
+        <TemplateColumn CellClass="d-flex justify-end">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudButton @attributes="Splats.ViewButton()" Size="@Size.Small" OnClick="@(() => View(context.Item))">View</MudButton>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+            <MudDataGridPager T="Domain.Models.Directory" />
+    </PagerContent>
+</MudDataGrid>

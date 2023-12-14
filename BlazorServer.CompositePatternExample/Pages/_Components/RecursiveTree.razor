@@ -1,0 +1,72 @@
+﻿@using BlazorServer.CompositePatternExample.Services.Files;
+@using BlazorServer.CompositePatternExample.Services.SizeCaluclators
+
+@foreach (var item in Directories!.Where(i => i.DirectoryId == ParentID))
+{
+    <MudTreeViewItem Value="@item.Name" TextTypo="Typo.h5" ExpandedIcon="@Icons.Material.Filled.ArrowRight" OnClick="() => DisplayDirectorySize(item)">
+        @foreach(var file in GetFiles(item.Id))
+        {
+            <MudTreeViewItem Value="@file.Name" TextTypo="Typo.h6" OnClick="@(() => DisplayFileSize(file))" />
+        }
+        @if (Directories!.Where(c => c.DirectoryId == item.Id).Any())
+        {
+            <RecursiveTree ParentID="item.Id" />  @* <-------- THIS IS THE MAGIC. <----------*@
+        }
+    </MudTreeViewItem>
+}
+
+
+@code {
+    [Parameter]
+    public int? ParentID { get; set; }
+
+    [CascadingParameter]
+    List<Domain.Models.Directory>? Directories { get; set; }
+
+    [Inject]
+    private IFileService? FileService { get; set; }
+
+    [Inject]
+    private IDirectorySizeCalculatorService? DirectorySizeCalculatorService { get; set; }
+
+    [Inject]
+    private ISnackbar? SnackbarService { get; set; }
+
+    public List<Domain.Models.File> GetFiles(int? DirectoryId)
+    {
+        if (FileService == null)
+        {
+            throw new Exception($"{nameof(FileService)}  is null!");
+        }
+        return FileService.Filter(x => x.DirectoryId == DirectoryId).ToList();
+    }
+
+    public void DisplayFileSize(Domain.Models.File file)
+    {
+        ShowSnackbarMessage($"{file.Name} has a size of {file.Size}", Color.Success);
+    }
+
+    public void ShowSnackbarMessage(string Message, MudBlazor.Color Color)
+    {
+        if (SnackbarService == null)
+        {
+            throw new ArgumentNullException(nameof(SnackbarService));
+        }
+
+        SnackbarService.Add<MudChip>(new Dictionary<string, object>() {
+                { "Text", $"{Message}" },
+                { "Color", Color }
+            });
+    }
+
+    public void DisplayDirectorySize(Domain.Models.Directory Directory)
+    {
+        if (DirectorySizeCalculatorService == null)
+        {
+            throw new Exception($"{nameof(DirectorySizeCalculatorService)}  is null!");
+        }
+
+        var Size = DirectorySizeCalculatorService.GetSize(Directory);
+        ShowSnackbarMessage($"{Directory.Name} has a size of {Size}", Color.Success);
+    }
+}
